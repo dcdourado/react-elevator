@@ -1,0 +1,30 @@
+.controller {
+  &__container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    width: 40px;
+    height: 60px;
+    padding: 5px;
+    background-color: gray;
+    border: 1px solid black;
+  }
+
+  &__button {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+  }
+
+  &__input {
+    margin: 0;
+    margin-bottom: 5px;
+    padding: 0;
+
+    width: 25px;
+    height: 25px;
+    text-align: center;
+  }
+}

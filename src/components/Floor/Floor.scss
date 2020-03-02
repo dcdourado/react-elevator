@@ -1,0 +1,33 @@
+.floor {
+  position: relative;
+  width: 225px;
+  height: 180px;
+
+  &__controller {
+    position: absolute;
+    right: 0;
+    top: 45px;
+  }
+
+  &__number {
+    position: absolute;
+    left: 8px;
+    top: 55px;
+
+    width: 30px;
+    background-color: brown;
+    border: 2px solid black;
+
+    font-weight: 700;
+    font-size: 25px;
+    color: white;
+    text-align: center;
+  }
+
+  &__human-waiting {
+    position: absolute;
+    z-index: 10;
+    top: 70px;
+    right: 30px;
+  }
+}

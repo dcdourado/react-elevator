@@ -1,0 +1,9 @@
+.elevator {
+  display: flex;
+  flex-direction: column;
+
+  &__item {
+    width: 225px;
+    height: 180px;
+  }
+}

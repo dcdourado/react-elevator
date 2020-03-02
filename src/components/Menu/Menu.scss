@@ -1,0 +1,18 @@
+.menu {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: stretch;
+
+  &__item {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    align-content: stretch;
+  }
+}
