@@ -28,12 +28,12 @@ export const down = () => ({ type: Actions.DOWN });
 export const open = () => ({ type: Actions.OPEN });
 export const addUp = (from: number, to: number) => ({ type: Actions.ADD_UP, payload: [from, to] });
 export const addDown = (from: number, to: number) => ({ type: Actions.ADD_DOWN, payload: [from, to] });
-export const removeUp = (id: number) => ({ type: Actions.REMOVE_UP, payload: id });
-export const removeDown = (id: number) => ({ type: Actions.REMOVE_DOWN, payload: id });
+export const removeUp = (to: number) => ({ type: Actions.REMOVE_UP, payload: [to] });
+export const removeDown = (to: number) => ({ type: Actions.REMOVE_DOWN, payload: [to] });
 
 type ActionTypes = {
   type: string;
-  payload: number;
+  payload: [number, number];
 };
 
 // Reducer
@@ -67,13 +67,13 @@ const reducer = (state = initialState, action: ActionTypes): State => {
         downs: [...state.downs, action.payload]
       };
     case Actions.REMOVE_UP:
-      const newUps = state.ups.filter(up => up !== action.payload);
+      const newUps = state.ups.filter(up => up[1] !== action.payload[0]);
       return {
         ...state,
         ups: newUps
       };
     case Actions.REMOVE_DOWN:
-      const newDowns = state.downs.filter(down => down !== action.payload);
+      const newDowns = state.downs.filter(down => down[1] !== action.payload[0]);
       return {
         ...state,
         downs: newDowns

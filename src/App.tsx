@@ -11,13 +11,12 @@ import './App.scss';
 
 const App: React.FC = () => {
   const height = useSelector((state: RootState) => state.building.height);
-  const speed = useSelector((state: RootState) => state.building.speed);
 
   return (
     <div className='app'>
       <Menu />
       <Building height={height} />
-      <Elevator height={height} speed={speed} />
+      <Elevator height={height} />
     </div>
   );
 };

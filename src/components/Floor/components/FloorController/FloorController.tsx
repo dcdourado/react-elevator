@@ -43,11 +43,11 @@ const FloorController: React.FC<FloorControllerProps> = props => {
     }
 
     if (elevateTo > id) {
-      if (elevatorUps.every((elevatorUp: number) => elevatorUp !== id)) {
-        dispatch(addUp(elevateTo));
+      if (elevatorUps.every((elevatorUp: [number, number]) => elevatorUp[1] !== id)) {
+        dispatch(addUp(id, elevateTo));
       }
     } else {
-      if (elevatorDowns.every((elevatorDown: number) => elevatorDown !== id)) {
+      if (elevatorDowns.every((elevatorDown: [number, number]) => elevatorDown[1] !== id)) {
         dispatch(addDown(id, elevateTo));
       }
     } 
