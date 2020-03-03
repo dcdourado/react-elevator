@@ -24,9 +24,6 @@ const Floor: React.FC<FloorProps> = props => {
 
   const humansWaiting = useSelector((state: RootState) => state.humans.waiting);
   const humanWaitingHere = humansWaiting.find(humanWaiting => humanWaiting.floor === id);
-  if (humanWaitingHere) {
-    console.log("TEM ALGUEM ESPERANDO");
-  }
 
   return (
     <div className="floor">

@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/index';
 import { up, down, open, removeUp, removeDown } from '../../store/ducks/elevator';
 import { removeWaiting } from '../../store/ducks/humans';
-import { clearInterval } from 'timers';
 
 import CableImg from '../../assets/cable.png';
 import ElevatorImg from '../../assets/elevator.png';
@@ -18,160 +17,161 @@ interface ElevatorProps {
 const Elevator: React.FC<ElevatorProps> = props => {
   const { height } = props;
 
-  const [movingUp, setMovingUp] = useState(false);
-  const [movingDown, setMovingDown] = useState(false);
+  const dispatch = useDispatch();
+
+  const activeFloor = useSelector((state: RootState) => state.elevator.floor);
+
+  const activeFloorRef = useRef(activeFloor);
+  activeFloorRef.current = activeFloor;
+
+  const ups = useSelector((state: RootState) => state.elevator.ups);
+  const downs = useSelector((state: RootState) => state.elevator.downs);
+
+  const [movingUp, setMovingUp] = useState<undefined | boolean>(undefined);
   const [stopFloors, setStopFloors] = useState<number[]>([]);
 
   const movingUpRef = useRef(movingUp);
   movingUpRef.current = movingUp;
-  const movingDownRef = useRef(movingDown);
-  movingDownRef.current = movingDown;
   const stopFloorsRef = useRef(stopFloors);
   stopFloorsRef.current = stopFloors;
-
-  const floor = useSelector((state: RootState) => state.elevator.floor);
-  const ups = useSelector((state: RootState) => state.elevator.ups);
-  const downs = useSelector((state: RootState) => state.elevator.downs);
-
-  const floorRef = useRef(floor);
-  floorRef.current = floor;
-  const upsRef = useRef(ups);
-  upsRef.current = ups;
-  const downsRef = useRef(downs);
-  downsRef.current = downs;
 
   const humansWaiting = useSelector((state: RootState) => state.humans.waiting);
 
   const humansWaitingRef = useRef(humansWaiting);
   humansWaitingRef.current = humansWaiting;
 
-  const dispatch = useDispatch();
-
   useEffect(() => {
     const elevator = setInterval(() => {
-      //console.clear();
-      //elevatorUp();
-      //elevatorDown();
-      console.log("Elevator working...");
-      console.log("Floor:", floorRef.current);
-      console.log("stopFloors:", stopFloorsRef.current);
-      console.log("ups", upsRef.current);
-      console.log("downs", downsRef.current);
-      console.log("Moving UP:", movingUpRef.current);
-      console.log("Moving DOWN:", movingDownRef.current);
-      console.log("========================");
+      elevate();
     }, 5000);
     return () => clearInterval(elevator);
     // eslint-disable-next-line
   }, []);
 
-  useEffect(() => {
-    const isElevatorStopped = (!movingDown && !movingUp);
-    const isAnyUpOrDown = (ups.length > 0 || downs.length > 0);
-    if (isElevatorStopped && isAnyUpOrDown) {
-      let selectedFloor: number;
-      if (ups[0] !== undefined) {
-        /*
-        if (ups[0] === floorRef.current) {
-          dispatch(removeUp(ups[0]));
-        }
-        */
-        selectedFloor = ups[0][0];
-      } else {
-        /*
-        if (downs[0] === floorRef.current) {
-          dispatch(removeDown(downs[0]));
-        }
-        */
-        selectedFloor = downs[0][0];
-      }
-      console.log("SELECTED FLOOR:", selectedFloor);
-      setMovingUp(selectedFloor > floor);
-      setMovingDown(selectedFloor < floor);
-    }
-    // eslint-disable-next-line
-  }, [ups, downs, movingUp, movingDown]);
-
-  useEffect(() => {
-    const addedCall = movingUp ? ups[ups.length-1] : downs[downs.length-1];
-
-    if (!addedCall) {
-      return;
-    }
-
-    if (movingUp ? (addedCall[0] >= floor) : (addedCall[0] <= floor)) {
-      console.log("CHEGUEI AQUI");
-      setStopFloors([...stopFloors, addedCall[0], addedCall[1]]);
-      const sortedStopFloors = stopFloors.sort((a: number, b: number) => movingUp ? (a - b) : (b - a));
-      setStopFloors(sortedStopFloors);
-    } else {
-      console.log("DISGRAÇA");
-    }
-    // eslint-disable-next-line
-  }, [ups, downs]);
-
-  const elevatorUp = () => {
-    // erro aqui
+  const elevate = () => {
     if (stopFloorsRef.current.length === 0) {
-      setMovingUp(false);
+      setMovingUp(undefined);
     }
-    if (!movingUpRef.current) {
+    if (movingUpRef.current === undefined) {
       return;
     }
     
-    // erro aqui
-    //const stopFloors = getStopFloors(floorRef.current, upsRef.current, movingUpRef.current);
-    if (stopFloors.find(stopFloor => stopFloor === floorRef.current)) {
+    if (stopFloorsRef.current[0] === activeFloorRef.current) {
+      console.log("OPEN");
       dispatch(open());
-      const humanWaitingOnThisFloor = humansWaitingRef.current.find(humanWaiting => humanWaiting.floor === floorRef.current);
-      if (humanWaitingOnThisFloor) {
-        dispatch(removeWaiting(humanWaitingOnThisFloor.id));
-      }
-      // erro aqui
-      dispatch(removeUp(floorRef.current));
-    } else {
+      dispatch(removeWaiting(activeFloorRef.current));
+      const newStopFloors = [...stopFloorsRef.current];
+      newStopFloors.splice(0, 1);
+      setStopFloors(newStopFloors);
+    } else if (stopFloorsRef.current[0] > activeFloorRef.current) {
+      console.log("UP");
       dispatch(up());
-    }
-  }
-
-  const elevatorDown = () => {
-    // erro aqui
-    if (downsRef.current.length === 0) {
-      setMovingDown(false);
-    }
-    if (!movingDownRef.current) {
-      return;
-    }
-
-    // erro aqui
-    //const stopFloors = getStopFloors(floorRef.current, downsRef.current, movingDownRef.current);
-    if (stopFloors.find(stopFloor => stopFloor === floorRef.current)) {
-      dispatch(open());
-      const humanWaitingOnThisFloor = humansWaitingRef.current.find(humanWaiting => humanWaiting.floor === floorRef.current);
-      if (humanWaitingOnThisFloor) {
-        dispatch(removeWaiting(humanWaitingOnThisFloor.id));
-      }
-      // erro aqui
-      dispatch(removeDown(floorRef.current));
     } else {
+      console.log("DOWN");
       dispatch(down());
     }
   }
 
-  /*
-  const getStopFloors = (actualFloor: number, allStopFloors: [number, number][], goingUp: boolean) => {
-    let linearAllStopFloors: number[] = [];
-    allStopFloors.forEach(floors => linearAllStopFloors = [...linearAllStopFloors, floors[0], floors[1]]);
+  // elevator movingUp/movingDown and stopFloor state management
+  useEffect(() => {
+    console.log(`Moving ${movingUp ? 'UP' : movingUp === false ? 'DOWN' : 'NOT MOVING'}`);
+    console.log('stopFloors', stopFloors);
+    console.log('ups', ups);
+    console.log('downs', downs);
 
-    const sortedStopFloors = linearAllStopFloors.sort((a: number, b: number) => goingUp ? (a - b) : (b - a));
-    const stopFloors = sortedStopFloors.filter(stopFloor => goingUp ? (stopFloor >= actualFloor) : (stopFloor <= actualFloor));
-    return stopFloors;
-  };
-  */
+    const isElevatorStopped = movingUp === undefined;
+    if (isElevatorStopped) {
+      if (ups.length > 0) {
+        if (ups[0][0] >= activeFloor) {
+          setMovingUp(true);
+        } else {
+          setMovingUp(false);
+        }
+      } else if (downs.length > 0) {
+        if (downs[0][0] <= activeFloor) {
+          setMovingUp(false);
+        } else {
+          setMovingUp(true);
+        }
+      }
+    }
+
+    attStopFloors();
+  }, [ups, downs, movingUp]);
+
+  const attStopFloors = () => {
+    let upRemovesIndex: number[] = [];
+    let downRemovesIndex: number[] = [];
+    if (movingUp) {
+      // problema aqui
+      if (ups.length > 0) {
+        ups.forEach((up, index) => {
+          if (up[0] < activeFloor) {
+            return;
+          }
+          upRemovesIndex = [...upRemovesIndex, index];
+          addToStopFloors(up, movingUp);
+        });
+        upRemovesIndex.forEach(upRemoveIndex => {
+          dispatch(removeUp(ups[upRemoveIndex][0], ups[upRemoveIndex][1]));
+        });
+      } else {
+        downs.forEach((down, index) => {
+          if (down[0] < activeFloor) {
+            return;
+          }
+          downRemovesIndex = [...downRemovesIndex, index];
+          addToStopFloors(down, false);
+        });
+        downRemovesIndex.forEach(downRemoveIndex => {
+          dispatch(removeDown(downs[downRemoveIndex][0], downs[downRemoveIndex][1]));
+        });
+      }
+    } else if (movingUp === false) {
+      // problema aqui
+      if (downs.length > 0) {
+        downs.forEach((down, index) => {
+          if (down[0] > activeFloor) {
+            return;
+          }
+          downRemovesIndex = [...downRemovesIndex, index];
+          addToStopFloors(down, movingUp);
+        });
+        downRemovesIndex.forEach(downRemoveIndex => {
+          dispatch(removeDown(downs[downRemoveIndex][0], downs[downRemoveIndex][1]));
+        });
+      } else {
+        ups.forEach((up, index) => {
+          if (up[0] < activeFloor) {
+            return;
+          }
+          upRemovesIndex = [...upRemovesIndex, index];
+          addToStopFloors(up, true);
+        });
+        upRemovesIndex.forEach(upRemoveIndex => {
+          dispatch(removeDown(ups[upRemoveIndex][0], ups[upRemoveIndex][1]));
+        });
+      }
+    }
+  }
+
+  const addToStopFloors = (stop: [number, number], up: boolean): void => {
+    const unsortedStopFloors = [...stopFloors, stop[0], stop[1]];
+    const sortedStopFloors = unsortedStopFloors.sort((a: number, b: number) => up ? (a - b) : (b - a));
+    const noRepeatStopFloors = sortedStopFloors.filter((stopFloor, index) => sortedStopFloors.indexOf(stopFloor) === index);
+    setStopFloors(noRepeatStopFloors);
+  }
+
+  const removeFromStopFloors = (stop: number): void => {
+    const stopFloorsCopy = [...stopFloors];
+    const removedStopFloors = stopFloorsCopy.filter(stopFloor => stopFloor !== stop);
+  }
+
+  const move = () => { }
 
   const cables = [];
 
-  for (let i = 0; i < height - floor - 1; i++) {
+  for (let i = 0; i < height - activeFloor - 1; i++) {
     cables.push(<img src={CableImg} alt="Cable" key={i} className="elevator__item" />);
   }
 
