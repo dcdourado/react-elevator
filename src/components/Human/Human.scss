@@ -1,4 +1,13 @@
 .human {
-  width: 48px;
-  height: 84px;
+  z-index: 99;
+
+  &--big {
+    width: 48px;
+    height: 84px;
+  }
+
+  &--small {
+    width: 24px;
+    height: 42px;
+  }
 }

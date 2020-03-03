@@ -3,7 +3,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/index';
 import { up, down, open, removeUp, removeDown } from '../../store/ducks/elevator';
-import { removeWaiting } from '../../store/ducks/humans';
+import { removeWaiting, removeActive, addActive } from '../../store/ducks/humans';
+
+import Human from '../Human/Human';
 
 import CableImg from '../../assets/cable.png';
 import ElevatorImg from '../../assets/elevator.png';
@@ -28,22 +30,25 @@ const Elevator: React.FC<ElevatorProps> = props => {
   const downs = useSelector((state: RootState) => state.elevator.downs);
 
   const [movingUp, setMovingUp] = useState<undefined | boolean>(undefined);
-  const [stopFloors, setStopFloors] = useState<number[]>([]);
-
   const movingUpRef = useRef(movingUp);
   movingUpRef.current = movingUp;
+
+  const [stopFloors, setStopFloors] = useState<number[]>([]);
   const stopFloorsRef = useRef(stopFloors);
   stopFloorsRef.current = stopFloors;
 
   const humansWaiting = useSelector((state: RootState) => state.humans.waiting);
-
   const humansWaitingRef = useRef(humansWaiting);
   humansWaitingRef.current = humansWaiting;
+
+  const humansActive = useSelector((state: RootState) => state.humans.active);
+  const humansActiveRef = useRef(humansActive);
+  humansActiveRef.current = humansActive;
 
   useEffect(() => {
     const elevator = setInterval(() => {
       elevate();
-    }, 5000);
+    }, 2000);
     return () => clearInterval(elevator);
     // eslint-disable-next-line
   }, []);
@@ -55,14 +60,21 @@ const Elevator: React.FC<ElevatorProps> = props => {
     if (movingUpRef.current === undefined) {
       return;
     }
-    
+
     if (stopFloorsRef.current[0] === activeFloorRef.current) {
       console.log("OPEN");
       dispatch(open());
-      dispatch(removeWaiting(activeFloorRef.current));
-      const newStopFloors = [...stopFloorsRef.current];
-      newStopFloors.splice(0, 1);
-      setStopFloors(newStopFloors);
+      const humanWaitingOnThisFloor = humansWaitingRef.current.find(human => human.from === activeFloorRef.current);
+      if (humanWaitingOnThisFloor) {
+        dispatch(addActive(humanWaitingOnThisFloor.id, humanWaitingOnThisFloor.from, humanWaitingOnThisFloor.to));
+        dispatch(removeWaiting(humanWaitingOnThisFloor.id));
+      }
+      const humanActiveOnThisFloor = humansActiveRef.current.find(human => human.to === activeFloorRef.current);
+      if (humanActiveOnThisFloor) {
+        dispatch(removeActive(humanActiveOnThisFloor.id));
+      }
+
+      removeFromStopFloors();
     } else if (stopFloorsRef.current[0] > activeFloorRef.current) {
       console.log("UP");
       dispatch(up());
@@ -97,6 +109,7 @@ const Elevator: React.FC<ElevatorProps> = props => {
     }
 
     attStopFloors();
+    //eslint-disable-next-line
   }, [ups, downs, movingUp]);
 
   const attStopFloors = () => {
@@ -162,23 +175,29 @@ const Elevator: React.FC<ElevatorProps> = props => {
     setStopFloors(noRepeatStopFloors);
   }
 
-  const removeFromStopFloors = (stop: number): void => {
-    const stopFloorsCopy = [...stopFloors];
-    const removedStopFloors = stopFloorsCopy.filter(stopFloor => stopFloor !== stop);
+  const removeFromStopFloors = (): void => {
+    const stopFloorsCopy = [...stopFloorsRef.current];
+    stopFloorsCopy.splice(0, 1);
+    setStopFloors(stopFloorsCopy);
   }
 
-  const move = () => { }
-
   const cables = [];
-
   for (let i = 0; i < height - activeFloor - 1; i++) {
     cables.push(<img src={CableImg} alt="Cable" key={i} className="elevator__item" />);
   }
 
+  const humans = humansActive.map((humanActive, key) => {
+    const shift = 50 + (key*20)%140 - Math.floor(key%8)*5;
+    return <Human id={humanActive.id} big={false} key={key} className="elevator__human" left={`${shift}px`} />;
+  })
+
   return (
     <div className="elevator">
       {cables}
-      <img src={ElevatorImg} alt="Elevator" className="elevator__item" />
+      <div className="elevator__container">
+        <img src={ElevatorImg} alt="Elevator" className="elevator__item" />
+        {humans}
+      </div>
     </div>
   );
 }

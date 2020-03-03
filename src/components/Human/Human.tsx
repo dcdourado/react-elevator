@@ -41,12 +41,15 @@ const humans = [
 
 interface HumanProps {
   id: number;
+  big: boolean;
+  className?: string;
+  left?: string;
 }
 
 const Human: React.FC<HumanProps> = props => {
-  const { id } = props;
+  const { id, big, className, left } = props;
 
-  return <img src={humans[id]} alt='Human' className='human' />;
+  return <img src={humans[id]} alt='Human' className={`human human--${big ? 'big' : 'small'} ${className || ''}`} style={{ left }} />;
 }
 
 export default Human;

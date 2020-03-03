@@ -9,8 +9,8 @@ const Actions = {
 // State
 interface Humans {
   id: number;
-  waiting: {id: number, floor: number}[];
-  active: {id: number, floor: number}[];
+  waiting: {id: number, from: number, to: number}[];
+  active: {id: number, from: number, to: number}[];
 }
 
 export type State = Humans;
@@ -19,14 +19,14 @@ const initialState: State = { id: 0, waiting: [], active: [] };
 
 // Action Creators
 
-export const addWaiting = (id: number, floor: number) => ({ type: Actions.ADD_WAITING, payload: { id, floor } });
+export const addWaiting = (id: number, from: number, to: number) => ({ type: Actions.ADD_WAITING, payload: { id, from, to } });
 export const removeWaiting = (id: number) => ({ type: Actions.REMOVE_WAITING, payload: { id } });
-export const addActive = (id: number, floor: number) => ({ type: Actions.ADD_ACTIVE, payload: { id, floor } });
+export const addActive = (id: number, from: number, to: number) => ({ type: Actions.ADD_ACTIVE, payload: { id, from, to } });
 export const removeActive = (id: number) => ({ type: Actions.REMOVE_ACTIVE, payload: { id } });
 
 type ActionTypes = {
   type: string;
-  payload: { id: number, floor: number };
+  payload: { id: number, from: number, to: number };
 };
 
 // Reducer

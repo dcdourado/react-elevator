@@ -51,7 +51,7 @@ const FloorController: React.FC<FloorControllerProps> = props => {
         dispatch(addDown(id, elevateTo));
       }
     } 
-    dispatch(addWaiting(nextHumanIdAvailable, id));
+    dispatch(addWaiting(nextHumanIdAvailable, id, elevateTo));
   };
 
   const handleChange = (event: React.FormEvent<HTMLInputElement>)  => {

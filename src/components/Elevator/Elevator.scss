@@ -6,4 +6,13 @@
     width: 225px;
     height: 180px;
   }
+
+  &__container {
+    position: relative;
+  }
+
+  &__human {
+    position: absolute;
+    bottom: 60px;
+  }
 }

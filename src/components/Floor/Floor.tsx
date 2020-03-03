@@ -23,14 +23,12 @@ const Floor: React.FC<FloorProps> = props => {
   const isOpen = isElevatorOnThisFloor && isElevatorNotMoving;
 
   const humansWaiting = useSelector((state: RootState) => state.humans.waiting);
-  const humanWaitingHere = humansWaiting.find(humanWaiting => humanWaiting.floor === id);
+  const humanWaitingHere = humansWaiting.find(humanWaiting => humanWaiting.from === id);
 
   return (
     <div className="floor">
       <img src={isOpen ? OpenFloor : ClosedFloor} alt='floor' />
-      <div className="floor__human-waiting">
-        {humanWaitingHere ? <Human id={humanWaitingHere.id} /> : null}
-      </div>
+      {humanWaitingHere ? <Human id={humanWaitingHere.id} big={true} className="floor__human" /> : null}
       <div className="floor__controller">
         <FloorController id={id} />
       </div>
